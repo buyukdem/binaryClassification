@@ -1,0 +1,31 @@
+
+Important Submission Instructions
+
+Submit via e-mail
+You should submit a single pdf document and source code as detailed below.
+
+This work is due April 5, 2020, 17:30
+-------------------------------------------
+
+Content of the work
+
+You can use built-in ML functions of Python or R programming platform you develop your code. 
+You can also use any other built-in functions (for example cov, pdist, mean, eig, etc).  
+
+IMPORTANT: The aim of this work is to predict the gender class and evaluate the algorithms which you used.
+
+The dataset can be found at 'dataset.csv' file.
+
+Use random half of the dataset for training and other half for test by preserving the distribution of the classes (gender) in the original dataset. 
+
+1) Guess (randomly) genders for the test dataset using different probabilities, and plot accuracy and F1 scores.
+(probability sets: {M:0.1, F:0.9}, {M:0.2, F:0.8}, ..., {M:0.9, F:0.1})
+Hint (Part of an R code): sample(c("Male", "Female"), length(test_dataset), replace = TRUE, prob=c(p, 1-p)) ##!! nrow(test_dataset) !!
+
+2) Use 2 different classification algorithms (Logistic Regression, Decision Tree, Naive Bayes, etc)
+Choose the model that gives the highest F1 score on the training set.
+Predict genders for the test set data. Show the confusion matrix, and calculate the accuracy, F1 score, precision and recall.
+
+3) Briefly write your comments about the obtained results.
+
+----------------------------------------------
