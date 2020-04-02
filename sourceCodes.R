@@ -29,17 +29,19 @@ test <- data[-intrain,]
 prop.table(table(train$Gender)); prop.table(table(test$Gender)) # distribution of genders are same for both sets
 
 plot3 <- ggplot(train, aes(x=Gender, y=Height, fill=Gender)) + 
+  ggtitle("Train Set") +
   ylab("Height (inch)") +
   ylim(50,80) +
   geom_boxplot(alpha=0.3) + 
-  theme(legend.position="none") + 
+  theme(legend.position="none", plot.title = element_text(hjust = 0.5)) + 
   scale_fill_brewer(palette="Dark2")
 
-plot4 <- ggplot(test, aes(x=Gender, y=Height, fill=Gender)) + 
+plot4 <- ggplot(test, aes(x=Gender, y=Height, fill=Gender)) +
+  ggtitle("Test Set") +
   ylab("Height (inch)") +
   ylim(50,80) +
   geom_boxplot(alpha=0.3) + 
-  theme(legend.position="none") + 
+  theme(legend.position="none", plot.title = element_text(hjust = 0.5)) + 
   scale_fill_brewer(palette="Dark2")
 
 grid.arrange(plot3, plot4, ncol=2)

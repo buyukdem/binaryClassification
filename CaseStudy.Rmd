@@ -7,22 +7,99 @@ output: pdf_document
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
-## R Markdown
+## Overview
 
-This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
+The aim of this work is to predict the gender class and evaluate the algorithms which are used. First the libraries we are going to use are installed to the environment.
 
-When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
-
-```{r cars}
-summary(cars)
+```{r message=FALSE, warning=FALSE}
+library(ggplot2)
+library(caret)
+library(gridExtra)
+library(randomForest)
 ```
 
-## Including Plots
+The dataset is loaded and summary about the dataset is shown.
 
-You can also embed plots, for example:
-
-```{r pressure, echo=FALSE}
-plot(pressure)
+```{r message=FALSE, warning=FALSE}
+data <- read.csv("dataset.CSV", header = T)
+str(data)
+prop.table(table(data$Gender))
 ```
 
-Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
+Stastics of the dataset's features are shown on the boxplots below.
+
+```{r echo=TRUE}
+plot1 <- ggplot(data, aes(x=Gender, y=Height, fill=Gender)) + 
+  ylab("Height (inch)") +
+  geom_boxplot(alpha=0.3) + 
+  theme(legend.position="none") + 
+  scale_fill_brewer(palette="Dark2")
+
+plot2 <- ggplot(data, aes(x=Gender, y=Weight, fill=Gender)) + 
+  ylab("Weight (pound)") +
+  geom_boxplot(alpha=0.3) +
+  theme(legend.position="none") + 
+  scale_fill_brewer(palette="Dark2")
+
+grid.arrange(plot1, plot2, ncol=2)
+```
+
+The dataset is split into train and test sets by half and half.
+
+```{r}
+intrain <- createDataPartition(y=data$Gender,p=0.5,list=FALSE)
+train <- data[intrain,]
+test <- data[-intrain,]
+```
+
+Proportions of train and test sets' gender are found to be same.
+
+```{r}
+prop.table(table(train$Gender))
+prop.table(table(test$Gender)) 
+```
+
+Boxplots below also demonstrate that distribution of 'Height' is similar in both sets.
+
+```{r}
+plot3 <- ggplot(train, aes(x=Gender, y=Height, fill=Gender)) + 
+  ggtitle("Train Set") +
+  ylab("Height (inch)") +
+  ylim(50,80) +
+  geom_boxplot(alpha=0.3) + 
+  theme(legend.position="none", plot.title = element_text(hjust = 0.5)) + 
+  scale_fill_brewer(palette="Dark2")
+
+plot4 <- ggplot(test, aes(x=Gender, y=Height, fill=Gender)) +
+  ggtitle("Test Set") +
+  ylab("Height (inch)") +
+  ylim(50,80) +
+  geom_boxplot(alpha=0.3) + 
+  theme(legend.position="none", plot.title = element_text(hjust = 0.5)) + 
+  scale_fill_brewer(palette="Dark2")
+
+grid.arrange(plot3, plot4, ncol=2)
+```
+
+Boxplots below also demonstrate that distribution of 'Weight' is similar in both sets.
+
+```{r}
+plot5 <- ggplot(train, aes(x=Gender, y=Weight, fill=Gender)) +
+  ggtitle("Train Set") +
+  ylab("Weight (pound)") +
+  ylim(50,300) +
+  geom_boxplot(alpha=0.3) +
+  theme(legend.position="none", plot.title = element_text(hjust = 0.5)) + 
+  scale_fill_brewer(palette="Dark2")
+
+plot6 <- ggplot(test, aes(x=Gender, y=Weight, fill=Gender)) + 
+  ggtitle("Test Set") +
+  ylab("Weight (pound)") +
+  ylim(50,300) +
+  geom_boxplot(alpha=0.3) +
+  theme(legend.position="none", plot.title = element_text(hjust = 0.5)) + 
+  scale_fill_brewer(palette="Dark2")
+
+grid.arrange(plot5, plot6, ncol=2)
+```
+
