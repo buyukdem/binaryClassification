@@ -103,3 +103,59 @@ plot6 <- ggplot(test, aes(x=Gender, y=Weight, fill=Gender)) +
 grid.arrange(plot5, plot6, ncol=2)
 ```
 
+Genders for the test dataset using different probabilities are predicted randomly. Predictions are stored in a dataframe.
+
+```{r}
+mat <- matrix(nrow = 5000, ncol = 0)
+for (p in (1:9)/10) {
+  mat <- cbind(mat,sample(c("Male", "Female"), nrow(test), replace = TRUE, prob=c(p, 1-p)))
+}
+
+df <- as.data.frame(mat)
+```
+
+Accuracy and F1 score of each prediction set is stored in a matrix. 
+
+```{r}
+accuracy <- matrix(nrow = 0, ncol = 2)
+for (i in 1:9) {
+  tp <- table(test$Gender,df[,i])[2,2]
+  tn <- table(test$Gender,df[,i])[1,1]
+  fp <- table(test$Gender,df[,i])[1,2]
+  fn <- table(test$Gender,df[,i])[2,1]
+  accuracy <- rbind(accuracy, c(i/10,((tp+tn)/(tp+tn+fp+fn))))
+}
+
+f1_score <- matrix(nrow = 0, ncol = 1)
+for (i in 1:9) {
+  tp <- table(test$Gender,df[,i])[2,2]
+  tn <- table(test$Gender,df[,i])[1,1]
+  fp <- table(test$Gender,df[,i])[1,2]
+  fn <- table(test$Gender,df[,i])[2,1]
+  precision <- tp/(tp+fp)
+  recall <- tp/(tp+fn)
+  f1_score <- rbind(f1_score, 2*(precision*recall)/(precision+recall))
+}
+```
+
+Aacuracy and F1 Score of each randomly predicted set is plotted below. Positive class is "Male". In some cases, true positive cases are more valuable than the true negative cases. Accuracy does not take that into account whereas F1 Score gives higher weight to positive cases. That' why i the plots, accuracy does not change throughout the different prediction sets. On the other hand, F1 score increases while probability of being male increases.
+
+```{r}
+perf_df <- as.data.frame(cbind(accuracy,f1_score))
+perf_df <- setNames(perf_df, c("male_prob","accuracy","f1_score"))
+
+plot7 <- ggplot(perf_df, aes(x = male_prob, y = accuracy)) + 
+  geom_line(color = "red", size = 1) + 
+  ylim(0,1) + 
+  theme_light()
+
+plot8 <- ggplot(perf_df, aes(x = male_prob, y = f1_score)) + 
+  geom_line(color = "green", size = 1) + 
+  ylim(0,1) + 
+  theme_light()
+
+grid.arrange(plot7, plot8, ncol=2)
+```
+
+## Algorithm Training
+
