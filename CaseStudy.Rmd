@@ -138,7 +138,7 @@ for (i in 1:9) {
 }
 ```
 
-Aacuracy and F1 Score of each randomly predicted set is plotted below. Positive class is "Male". In some cases, true positive cases are more valuable than the true negative cases. Accuracy does not take that into account whereas F1 Score gives higher weight to positive cases. That' why i the plots, accuracy does not change throughout the different prediction sets. On the other hand, F1 score increases while probability of being male increases.
+Aacuracy and F1 Score of each randomly predicted set is plotted below. Positive class is "Male". In some cases, true positive cases are more valuable than the true negative cases. Accuracy does not take that into account whereas F1 Score gives higher weight to positive cases. That's why, according to plots, accuracy does not change much throughout the different prediction sets. On the other hand, F1 score increases while probability of being male increases.
 
 ```{r}
 perf_df <- as.data.frame(cbind(accuracy,f1_score))
@@ -159,3 +159,121 @@ grid.arrange(plot7, plot8, ncol=2)
 
 ## Algorithm Training
 
+First, logistic regression algorithm is used to build a model for predicting gender. Positive class is chosen "Male" as default.
+
+```{r}
+model <- glm(Gender ~., family=binomial(link='logit'), data=train)
+model
+```
+
+Prediction scores are done based on the model and each observation in the train set is asssigned either male or female according to their scores.
+
+```{r}
+pred_train <- predict.glm(model, newdata = train, type = "response")
+pred_train <- as.data.frame(ifelse(pred_train >= 0.5, "Male", "Female"))
+pred_train$Gender <- pred_train[,1]
+pred_train[,1] <- NULL
+```
+
+F1 score of train set when we use logistic regression, is then calculated. Other performance metrics are also calculated.
+
+```{r}
+cm <- table(train$Gender,pred_train$Gender)
+tp <- cm[2,2]
+tn <- cm[1,1]
+fp <- cm[1,2]
+fn <- cm[2,1]
+precision <- tp/(tp+fp)
+recall <- tp/(tp+fn)
+f1_score_log <- 2*(precision*recall)/(precision+recall)
+
+print(cm)
+print(precision)
+print(recall)
+print(f1_score_log)
+```
+
+Second, Random Forest Algorithm is used. Again positive class is chosen as "Male".
+
+```{r}
+rf <- randomForest(Gender ~ ., ntree = 100, data = train)
+plot(rf) 
+```
+
+Error significantly decreases until 30 trees. That's why tree size is chosen as 30. 
+
+```{r}
+rf <- randomForest(Gender ~ ., ntree = 30, data = train)
+```
+
+Prediction scores are done based on the model and each observation in the train set is asssigned either male or female according to their scores.
+
+```{r}
+pred_rf <- predict(rf, train, type = "prob")
+pred_rf <- pred_rf[,2]
+pred_rf <- as.data.frame(ifelse(pred_rf >= 0.5, "Male", "Female"))
+pred_rf$Gender <- pred_rf[,1]
+pred_rf[,1] <- NULL
+```
+
+F1 score of train set when we use Random Forest, is then calculated. Other performance metrics are also calculated.
+
+```{r}
+cm <- table(train$Gender,pred_rf$Gender)
+tp <- cm[2,2]
+tn <- cm[1,1]
+fp <- cm[1,2]
+fn <- cm[2,1]
+precision <- tp/(tp+fp)
+recall <- tp/(tp+fn)
+accuracy <- (tp+tn)/(tp+tn+fp+fn)
+f1_score_rf <- 2*(precision*recall)/(precision+recall)
+
+print(cm)
+print(precision)
+print(recall)
+print(accuracy)
+print(f1_score_rf)
+```
+
+Comparing F1 score of each model one another, Random Forest performs better. 
+
+```{r}
+ifelse(f1_score_rf >= f1_score_log, 
+       print("Go for Random Forest!"), 
+       print("Go for Logistic Regression!"))
+```
+
+## Model Performance
+
+Model that is built using Random Forest Classification Algorithm is used to predict the observations' gender.
+
+```{r}
+pred_rf_test <- predict(rf, test, type = "prob")
+pred_rf_test <- pred_rf_test[,2]
+pred_rf_test <- as.data.frame(ifelse(pred_rf_test >= 0.5, "Male", "Female"))
+pred_rf_test$Gender <- pred_rf_test[,1]
+pred_rf_test[,1] <- NULL
+```
+
+Performance metrics of the test set are given below.
+
+```{r}
+cm <- table(test$Gender,pred_rf_test$Gender)
+tp <- cm[2,2]
+tn <- cm[1,1]
+fp <- cm[1,2]
+fn <- cm[2,1]
+precision <- tp/(tp+fp)
+recall <- tp/(tp+fn)
+accuracy <- (tp+tn)/(tp+tn+fp+fn)
+f1_score_test <- 2*(precision*recall)/(precision+recall)
+
+print(cm)
+print(precision)
+print(recall)
+print(accuracy)
+print(f1_score_test)
+```
+
+When Random Forest algorithm is used, training performance is seen as 99% (accuracy, F1 score etc.) which is very good. However, on the test set, performance drops at around 90% (accuracy, F1 score etc.). This ratio is also very good. However, a slight overfit may seem to occur whether we do the predictions using Random Forest Classification Algorithm. Logistic Regression algorithm should also be checked for whether there is overfitting or not.

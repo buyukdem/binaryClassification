@@ -108,6 +108,7 @@ grid.arrange(plot7, plot8, ncol=2)
 # logistic regression, positive class: male
 model <- glm(Gender ~., family=binomial(link='logit'), data=train)
 model
+
 pred_train <- predict.glm(model, newdata = train, type = "response")
 summary(pred_train)
 head(pred_train)
@@ -128,8 +129,8 @@ f1_score_log <- 2*(precision*recall)/(precision+recall)
 
 # random forest, positive class: male
 rf <- randomForest(Gender ~ ., ntree = 100, data = train)
-plot(rf) # error significantly decreases until 20 trees
-rf <- randomForest(Gender ~ ., ntree = 20, data = train)
+plot(rf) # error significantly decreases until 30 trees
+rf <- randomForest(Gender ~ ., ntree = 30, data = train)
 pred_rf <- predict(rf, train, type = "prob")
 summary(pred_rf)
 head(pred_rf)
